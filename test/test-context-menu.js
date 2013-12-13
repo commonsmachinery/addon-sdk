@@ -3467,7 +3467,8 @@ exports.testPredicateContextSelectionInTextBox = function (assert, done) {
   let items = [loader.cm.Item({
     label: "item",
     context: loader.cm.PredicateContext(function (data) {
-      // since we might get whitespace
+      assert.strictEqual(data.targetName, "input");
+      assert.strictEqual(data.targetID, "textbox");
       assert.strictEqual(data.selectionText, "t v");
       return true;
     })
@@ -3482,6 +3483,33 @@ exports.testPredicateContextSelectionInTextBox = function (assert, done) {
     });
   });
 };
+
+// Test that the data object includes the selected input text
+exports.testPredicateContextSelectionInTextField = function (assert, done) {
+  let test = new TestHelper(assert, done);
+  let loader = test.newLoader();
+
+  let items = [loader.cm.Item({
+    label: "item",
+    context: loader.cm.PredicateContext(function (data) {
+      assert.strictEqual(data.targetName, "textarea");
+      assert.strictEqual(data.targetID, "textfield");
+      assert.strictEqual(data.selectionText, "with some");
+      return true;
+    })
+  })];
+
+  test.withTestDoc(function (window, doc) {
+    let textfield = doc.getElementById("textfield");
+    textfield.setSelectionRange(textfield.value.indexOf('with'),
+				textfield.value.indexOf('some') + 4);
+    test.showMenu(textfield, function (popup) {
+      test.checkMenu(items, [], []);
+      test.done();
+    });
+  });
+};
+
 
 // Test that the data object has the correct src for an image
 exports.testPredicateContextTargetSrcSet = function (assert, done) {
